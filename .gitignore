@@ -1,0 +1,44 @@
+# Python specific
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+*.dylib
+*.egg
+*.egg-info/
+dist/
+build/
+*.log
+
+# Virtual environments
+venv/
+env/
+.venv/
+ENV/
+*.env
+
+# Poetry files
+.poetry/
+.poetry/*
+poetry.lock
+
+# IDEs and editors
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Test and coverage
+*.coveragerc
+.coverage
+nosetests.xml
+coverage.xml
+*.hypothesis/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/

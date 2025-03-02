@@ -1,0 +1,42 @@
+name: Publish Helm-Inspect to PyPI
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - uses: actions/setup-python@v3
+      with:
+        python-version: 3.12
+
+    - name: Install Poetry
+      run: |
+        python -m pip install --upgrade pip
+        pip install poetry
+
+    - name: Install Dependencies
+      run: |
+        poetry self add "poetry-dynamic-versioning[plugin]"
+        poetry install
+
+    - name: Build the Package
+      run: |
+        echo "Version: $(poetry version)"
+        poetry build
+
+    - name: Publish to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        poetry publish --username "$TWINE_USERNAME" --password "$TWINE_PASSWORD"
