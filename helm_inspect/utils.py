@@ -11,6 +11,31 @@ import json
 import yaml
 from typing import Any, Dict, List, Set, Union
 
+IGNORABLE_KEYS = [
+    "clusterIP",
+    "clusterIPs",
+    "internalTrafficPolicy",
+    "ipFamilies",
+    "ipFamilyPolicy",
+    "sessionAffinity",
+    "progressDeadlineSeconds",
+    "revisionHistoryLimit",
+    "template.metadata.annotations",
+    "strategy",
+    "template.metadata.creationTimestamp",
+    "template.spec.dnsPolicy",
+    "template.spec.restartPolicy",
+    "template.spec.schedulerName",
+    "template.spec.securityContext",
+    "template.spec.terminationGracePeriodSeconds",
+    "template.spec.containers.resources",
+    "template.spec.containers.terminationMessagePath",
+    "template.spec.containers.terminationMessagePolicy",
+    "template.spec.containers.ports.protocol",
+    "volumes.[0].configMap.defaultMode",
+    "ingressClassName",
+]
+
 
 def run_command(command: List[str]) -> str:
     try:
@@ -43,7 +68,7 @@ def get_k8s_resource(kind: str, name: str, namespace: str) -> Dict[str, Any]:
 
 
 def remove_nested_keys(data: Any, keys_to_ignore: Set[str]) -> Any:
-    """Recursively removes ignored keys from a nested dictionary, handling lists correctly."""
+    """Recursively removes ignored keys from a nested dictionary or list."""
 
     def pop_nested_keys(d: Union[Dict[str, Any], List[Any]], key_path: str):
         """Recursively traverses the dictionary/list and removes keys using a key path."""
@@ -51,7 +76,19 @@ def remove_nested_keys(data: Any, keys_to_ignore: Set[str]) -> Any:
         current = d
 
         for i, key in enumerate(keys):
-            if isinstance(current, dict):
+            if "[" in key and "]" in key:
+                key_name, index_part = key.split("[", 1)
+                index = int(index_part.rstrip("]"))
+
+                if isinstance(current, dict) and key_name in current:
+                    current = current[key_name]
+
+                if isinstance(current, list) and 0 <= index < len(current):
+                    current = current[index]
+                else:
+                    return
+
+            elif isinstance(current, dict):
                 if key in current:
                     if i == len(keys) - 1:
                         current.pop(key, None)
@@ -59,7 +96,7 @@ def remove_nested_keys(data: Any, keys_to_ignore: Set[str]) -> Any:
                         current = current[key]
 
             elif isinstance(current, list):
-                for j, item in enumerate(current):
+                for item in current:
                     if isinstance(item, dict):
                         pop_nested_keys(item, ".".join(keys[i:]))
                 break
@@ -78,7 +115,10 @@ def remove_nested_keys(data: Any, keys_to_ignore: Set[str]) -> Any:
     return data
 
 
-def extract_relevant_data(resource: Dict[str, Any]) -> Any:
+def extract_relevant_data(
+    resource: Dict[str, Any], ignorable_keys: list
+) -> Dict[str, Any]:
+    """Extracts relevant data from a Kubernetes resource."""
     kind = resource.get("kind", "Unknown")
     if kind in ["ConfigMap", "Secret"]:
         return resource.get("data", {})
@@ -86,37 +126,9 @@ def extract_relevant_data(resource: Dict[str, Any]) -> Any:
     elif kind in ["Deployment", "Service", "Ingress"]:
         spec = resource.get("spec", {})
 
-        if kind == "Service":
-            ignored_keys = {
-                "clusterIP",
-                "clusterIPs",
-                "internalTrafficPolicy",
-                "ipFamilies",
-                "ipFamilyPolicy",
-                "sessionAffinity",
-            }
-            spec = {k: v for k, v in spec.items() if k not in ignored_keys}
-
-        elif kind == "Deployment":
-            ignored_keys = {
-                "progressDeadlineSeconds",
-                "revisionHistoryLimit",
-                "template.metadata.annotations",
-                "strategy",
-                "template.metadata.creationTimestamp",
-                "template.spec.dnsPolicy",
-                "template.spec.restartPolicy",
-                "template.spec.schedulerName",
-                "template.spec.securityContext",
-                "template.spec.terminationGracePeriodSeconds",
-                "template.spec.containers.resources",
-                "template.spec.containers.terminationMessagePath",
-                "template.spec.containers.terminationMessagePolicy",
-                "template.spec.containers.ports.protocol",
-                "volumes.configMap.defaultMode",
-            }
-            spec = remove_nested_keys(spec, ignored_keys)
-
+        if not ignorable_keys:
+            return spec
+        spec = remove_nested_keys(spec, ignorable_keys)
         return spec
 
     return resource
