@@ -25,7 +25,7 @@ pytest = "8.3.4"
 enable = true
 
 [tool.poetry.scripts]
-helm-inspect = "helm_inspect.cli:main"
+helm-inspect = "helm_inspect.main:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
