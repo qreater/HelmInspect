@@ -16,6 +16,10 @@ from pathlib import Path
 from helm_inspect.utils.calibration import get_calibration_file, save_drift_data
 from helm_inspect.utils.drift_check import check_drift, IGNORABLE_KEYS
 from helm_inspect.utils.logger import setup_logger
+from helm_inspect.utils.constant import HI_SLACK_BOT_TOKEN, HI_SLACK_CHANNEL
+
+from helm_inspect.integrations.slack import post_slack_message
+
 from typing import Optional
 
 logger = setup_logger()
@@ -75,11 +79,48 @@ def parse_args():
         help="Enable verbose logging (debug mode).",
     )
 
+    parser.add_argument(
+        "--slack-channel",
+        help="Slack channel to post drift detection results (or set HI_SLACK_CHANNEL env var)",
+    )
+
+    parser.add_argument(
+        "--slack-token", help="Slack bot token (or set HI_SLACK_BOT_TOKEN env var)"
+    )
+
     return parser.parse_args()
 
 
+def validate_args(args: argparse.Namespace) -> None:
+    """
+    Validate command line arguments.
+
+    Args:
+        args (argparse.Namespace): Parsed arguments.
+    """
+
+    if args.no_ignore and args.calibrate:
+        logger.error(
+            "❌ Cannot use --no-ignore with --calibrate. Please use only one of these flags."
+        )
+        sys.exit(1)
+
+    if (args.slack_token and not args.slack_channel) or (
+        args.slack_channel and not args.slack_token
+    ):
+        logger.error(
+            "❌ Both --slack-token and --slack-channel are required when using Slack notifications."
+        )
+        sys.exit(1)
+
+
 def detect_drift(
-    release: str, namespace: str, cluster_name: str, no_ignore: bool
+    release: str,
+    namespace: str,
+    cluster_name: str,
+    no_ignore: bool,
+    slack_channel: Optional[str] = None,
+    slack_token: Optional[str] = None,
 ) -> None:
     """
     Detect drift between Helm and Kubernetes.
@@ -89,6 +130,8 @@ def detect_drift(
         namespace (str): Kubernetes namespace.
         cluster_name (str): Kubernetes cluster name.
         no_ignore (bool): Flag to disable key ignoring for strict drift detection.
+        slack_channel (str, optional): Slack channel to post drift detection results.
+        slack_token (str, optional): Slack bot token.
     """
 
     calibration_data = get_calibration_file(release, namespace, cluster_name)
@@ -135,6 +178,7 @@ def detect_drift(
     logger.info("✨ Drift detection completed.")
     logger.info(
         "-----\n\n✨Drift Summary✨\n\n"
+        f" • Cluster: {cluster_name}\n"
         f" • Release: {release}\n"
         f" • Namespace: {namespace}\n\n"
         f" • Drifts: {drift_meta['drift_summary']['total_drifts']}\n"
@@ -147,3 +191,11 @@ def detect_drift(
         f"   +---------------------+-----------------------+\n\n"
         f"  • Drift Report File: {drift_file}\n"
     )
+
+    if (slack_channel and slack_token) or (HI_SLACK_CHANNEL and HI_SLACK_BOT_TOKEN):
+        slack_channel = slack_channel or HI_SLACK_CHANNEL
+        slack_token = slack_token or HI_SLACK_BOT_TOKEN
+
+        post_slack_message(
+            drift_meta, release, namespace, cluster_name, slack_channel, slack_token
+        )

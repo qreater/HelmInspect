@@ -8,16 +8,12 @@
 
 import json
 from datetime import datetime
-from pathlib import Path
 
 from helm_inspect.utils.logger import setup_logger
 from helm_inspect.utils.drift_check import get_ignorable_keys
+from helm_inspect.utils.constant import TMP_DIR, DRIFT_DIR
 
 logger = setup_logger()
-
-BASE_DIR = Path.home() / ".helminspect"
-TMP_DIR = BASE_DIR / "tmp"
-DRIFT_DIR = BASE_DIR / "drift"
 
 
 def get_calibration_file(release: str, namespace: str, cluster: str) -> dict:
