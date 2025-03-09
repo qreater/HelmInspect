@@ -12,6 +12,7 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent"
 ]
+include = ["helm_inspect/**"]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
