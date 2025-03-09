@@ -1,0 +1,121 @@
+@import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+
+:root {
+    --primary-color: #505BFF;
+    --secondary-color: #00F6FF;
+    --accent-color: #FF0000;
+    --text-color: #FFFFFF;
+    --border-color: #000000;
+    --background-color: #171717;
+    --dull-color: #8C8C8C;
+  
+    --font-primary: "Special Elite", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  
+    --radius: 8px;
+    --shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  html {
+    font-size: 16px;
+  }
+  
+  body {
+    font-family: var(--font-primary);
+    color: var(--text-color);
+
+    position: fixed;
+    width: 100%;
+    height: 100%;
+
+    -webkit-tap-highlight-color: transparent;
+    background-color: var(--background-color);
+    line-height: 1.6;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+  }
+  
+  h1 { font-size: 2.25rem; }
+  h2 { font-size: 1.875rem; }
+  h3 { font-size: 1.5rem; }
+  h4 { font-size: 1.25rem; }
+  h5 { font-size: 1.125rem; }
+  h6 { font-size: 1rem; }
+  
+  p {
+    font-size: 1rem;
+  }
+  
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+  
+  .flex {
+    display: flex;
+    align-items: center;
+  }
+  
+  .grid {
+    display: grid;
+    gap: 1rem;
+  }
+  
+  button {
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: var(--radius);
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary {
+    background-color: var(--primary-color);
+    color: #fff;
+  }
+  
+  .btn-primary:hover {
+    background-color: #4338ca;
+  }
+  
+  a {
+    color: var(--primary-color);
+    text-decoration: none;
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  input, textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 1rem;
+  }
+  
+  input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+  }
+
+  @media (max-width: 768px) {
+    html {
+      font-size: 14px;
+    }
+  
+    .container {
+      padding: 0 0.5rem;
+    }
+  }
+  

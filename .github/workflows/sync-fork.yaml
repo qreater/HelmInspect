@@ -1,0 +1,47 @@
+name: Sync Fork with Upstream
+
+permissions:
+  contents: write
+  pull-requests: none
+  issues: none
+
+on:
+  push:
+    branches:
+      - main
+      - feature/*
+      - fix/*
+
+jobs:
+  sync-fork:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Forked Repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ secrets.USERNAME }}/HelmInspect
+          token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Add Upstream Remote
+        run: |
+          git remote add upstream https://github.com/${{ github.repository }}.git
+          git remote -v
+
+      - name: Fetch Upstream Changes
+        run: |
+          git fetch upstream
+          git checkout ${{ github.ref_name }} || git checkout -b ${{ github.ref_name }}
+
+      - name: Force Merge Upstream Changes
+        run: |
+          # Dynamically merge the corresponding upstream branch
+          git merge upstream/${{ github.ref_name }} --allow-unrelated-histories --strategy-option=theirs --no-edit
+
+      - name: Push Changes to Fork
+        run: |
+          if ! git push origin ${{ github.ref_name }} --force; then
+            echo "::error::Failed to push changes to fork"
+            exit 1
+          fi
+          echo "::notice::Successfully synced fork with upstream"
