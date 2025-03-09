@@ -134,7 +134,7 @@ export const ScenarioItem = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    text-align: flex-start;
+    text-align: left;
 
     gap: 1rem;
 `

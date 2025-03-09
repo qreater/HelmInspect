@@ -21,26 +21,3 @@ export const LayoutContent = styled.div`
         padding: 3rem 1rem;
     }
 `
-
-export const SectionWrapper = styled.div`
-    max-width: 1200px;
-    margin: 0 auto;
-
-    overflow-y: auto;
-    height: 220vh;
-
-    padding: 2rem;
-
-    @media screen and (max-width: 1376px) {
-        max-width: 80%;
-    }
-
-    @media screen and (max-width: 1024px) {
-        padding: 1.5rem;
-        max-width: 90%;
-    }
-
-    @media screen and (max-width: 768px) {
-        padding: 1rem;
-    }
-`
