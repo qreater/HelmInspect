@@ -11,6 +11,7 @@ export const HowWrapper = styled.div`
 
     @media (max-width: 1024px) {
         padding: 0;
+        margin-bottom: 5rem;
     }
 `
 
@@ -22,7 +23,8 @@ export const HowContent = styled.div`
     width: 100%;
 
     @media (max-width: 1024px) {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column-reverse;
         height: auto;
     }
 `
