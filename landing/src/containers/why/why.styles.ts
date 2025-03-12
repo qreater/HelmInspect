@@ -22,6 +22,7 @@ export const WhyContent = styled.div`
     width: 100%;
 
     @media (max-width: 1024px) {
-        grid-template-columns: 1fr;
+        display: flex;
+        flex-direction: column;
     }
 `
